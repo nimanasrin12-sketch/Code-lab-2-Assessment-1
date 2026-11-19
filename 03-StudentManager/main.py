@@ -4,7 +4,7 @@ import tkinter as tk
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
 # Purpose: Assistance with developing a Tkinter Student Manager application.
-# Prompt: Help me read student records from a text file using Python.
+# Prompt: Help me create a Student Manager with student records, viewing and managing student information.
 
 # Colour theme
 NAVY = "#172554"
@@ -27,16 +27,17 @@ def loadStudents():
         for line in file:
             data = line.strip().split(",")
 
-            student = {
-                "code": data[0],
-                "name": data[1],
-                "course1": int(data[2]),
-                "course2": int(data[3]),
-                "course3": int(data[4]),
-                "exam": int(data[5])
-            }
+            if len(data) == 6:
+                student = {
+                    "code": data[0],
+                    "name": data[1],
+                    "course1": int(data[2]),
+                    "course2": int(data[3]),
+                    "course3": int(data[4]),
+                    "exam": int(data[5])
+                }
 
-            students.append(student)
+                students.append(student)
 
     return students
 
@@ -44,8 +45,55 @@ def loadStudents():
 # Load student records
 studentList = loadStudents()
 
-print("Student records loaded successfully!")
-print("Number of students:", len(studentList))
+
+# Function to view all students
+def viewAllStudents():
+
+    studentWindow = tk.Toplevel(root)
+    studentWindow.title("All Students")
+    studentWindow.geometry("700x450")
+    studentWindow.config(bg=LIGHT_GREY)
+
+    title = tk.Label(
+        studentWindow,
+        text="ALL STUDENT RECORDS",
+        font=(FONT, 20, "bold"),
+        bg=NAVY,
+        fg=WHITE,
+        pady=15
+    )
+    title.pack(fill="x")
+
+    records = tk.Text(
+        studentWindow,
+        font=(FONT, 11),
+        bg=WHITE,
+        fg=NAVY,
+        width=80,
+        height=18
+    )
+    records.pack(padx=15, pady=15)
+
+    records.insert(
+        tk.END,
+        f"{'Code':<10}{'Name':<22}{'C1':<7}{'C2':<7}{'C3':<7}{'Exam':<7}\n"
+    )
+
+    records.insert(tk.END, "-" * 65 + "\n")
+
+    for student in studentList:
+
+        records.insert(
+            tk.END,
+            f"{student['code']:<10}"
+            f"{student['name']:<22}"
+            f"{student['course1']:<7}"
+            f"{student['course2']:<7}"
+            f"{student['course3']:<7}"
+            f"{student['exam']:<7}\n"
+        )
+
+    records.config(state="disabled")
 
 
 # Create the main application window
@@ -75,6 +123,18 @@ welcomeLabel = tk.Label(
     fg=NAVY
 )
 welcomeLabel.pack(pady=30)
+
+# View all students button
+viewButton = tk.Button(
+    root,
+    text="View All Students",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    width=22,
+    command=viewAllStudents
+)
+viewButton.pack(pady=15)
 
 # Run application
 root.mainloop()
