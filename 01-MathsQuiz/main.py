@@ -3,11 +3,24 @@ import tkinter as tk
 import random
 from tkinter import messagebox
 
+# AI assistance acknowledgement:
+# Tool: ChatGPT (OpenAI)
+# Purpose: Assistance with developing and styling a Tkinter maths quiz.
+
+# Colour theme
+NAVY = "#172554"
+LIGHT_GREY = "#F0F4F8"
+WHITE = "#FFFFFF"
+
+# Font settings
+FONT = "Segoe UI"
+
 # Create the main application window
 root = tk.Tk()
 root.title("Maths Quiz")
-root.geometry("600x500")
-root.resizable(False, False)
+root.geometry("650x700")
+root.resizable(True, True)
+root.config(bg=LIGHT_GREY)
 
 # Store quiz information
 selectedDifficulty = ""
@@ -15,46 +28,72 @@ correctAnswer = 0
 attempts = 0
 questionNumber = 0
 score = 0
+quizFinished = True
 
 # Application heading
 heading = tk.Label(
     root,
     text="MATHS QUIZ",
-    font=("Arial", 24, "bold")
+    font=(FONT, 28, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    pady=20
 )
-heading.pack(pady=15)
+heading.pack(fill="x")
+
+# Subtitle
+subtitle = tk.Label(
+    root,
+    text="Test Your Mathematical Skills",
+    font=(FONT, 12),
+    bg=LIGHT_GREY,
+    fg=NAVY
+)
+subtitle.pack(pady=12)
 
 # Instructions
 instruction = tk.Label(
     root,
-    text="Choose your difficulty level:",
-    font=("Arial", 14)
+    text="Choose Your Difficulty",
+    font=(FONT, 14, "bold"),
+    bg=LIGHT_GREY,
+    fg=NAVY
 )
-instruction.pack(pady=5)
+instruction.pack(pady=8)
 
 # Question counter
 progressLabel = tk.Label(
     root,
     text="Question: 0 / 10     Score: 0",
-    font=("Arial", 12, "bold")
+    font=(FONT, 12, "bold"),
+    bg=LIGHT_GREY,
+    fg=NAVY
 )
-progressLabel.pack(pady=10)
+progressLabel.pack(pady=12)
 
 # Question display
 questionLabel = tk.Label(
     root,
     text="",
-    font=("Arial", 20, "bold")
+    font=(FONT, 24, "bold"),
+    bg=WHITE,
+    fg=NAVY,
+    width=25,
+    height=2
 )
-questionLabel.pack(pady=15)
+questionLabel.pack(pady=12)
 
 # Answer input box
 answerEntry = tk.Entry(
     root,
-    font=("Arial", 16),
-    justify="center"
+    font=(FONT, 18),
+    justify="center",
+    bg=WHITE,
+    fg=NAVY,
+    relief="solid",
+    bd=1
 )
-answerEntry.pack(pady=10)
+answerEntry.pack(pady=12, ipadx=20, ipady=5)
 
 
 # Function to generate random numbers
@@ -105,7 +144,8 @@ def updateProgress():
 # Function to display a question
 def displayProblem(level):
 
-    global correctAnswer, attempts, questionNumber
+    global correctAnswer, attempts
+    global questionNumber, quizFinished
 
     if questionNumber == 10:
         displayResults()
@@ -128,6 +168,8 @@ def displayProblem(level):
     )
 
     answerEntry.delete(0, tk.END)
+    answerEntry.focus()
+
     updateProgress()
 
 
@@ -136,11 +178,7 @@ def checkAnswer():
 
     global attempts, score
 
-    if not selectedDifficulty:
-        messagebox.showwarning(
-            "Choose Difficulty",
-            "Please select a difficulty level first."
-        )
+    if quizFinished:
         return
 
     try:
@@ -158,6 +196,7 @@ def checkAnswer():
 
             messagebox.showinfo("Correct Answer", message)
 
+            updateProgress()
             displayProblem(selectedDifficulty)
 
         else:
@@ -193,9 +232,11 @@ def checkAnswer():
 # Function to display final results
 def displayResults():
 
-    questionLabel.config(
-        text="QUIZ COMPLETED!"
-    )
+    global quizFinished
+
+    quizFinished = True
+
+    questionLabel.config(text="QUIZ COMPLETED!")
 
     answerEntry.pack_forget()
     submitButton.pack_forget()
@@ -228,27 +269,29 @@ def displayResults():
         text=f"Final Score: {score}/100\nGrade: {grade}\nRank: {rank}"
     )
 
-    resultLabel.pack(pady=15)
-    replayButton.pack(pady=10)
+    resultLabel.pack(pady=20)
+    replayButton.pack(pady=12)
 
 
 # Function to restart the quiz
 def replayQuiz():
 
     global questionNumber, score, attempts
+    global quizFinished
 
     questionNumber = 0
     score = 0
     attempts = 0
+    quizFinished = True
 
     resultLabel.pack_forget()
     replayButton.pack_forget()
 
-    answerEntry.pack(pady=10)
-    submitButton.pack(pady=10)
+    answerEntry.pack(pady=12, ipadx=20, ipady=5)
+    submitButton.pack(pady=12)
 
     instruction.config(
-        text="Choose your difficulty level:"
+        text="Choose Your Difficulty"
     )
 
     progressLabel.config(
@@ -262,18 +305,18 @@ def replayQuiz():
 def selectDifficulty(level):
 
     global selectedDifficulty
-    global questionNumber
-    global score
+    global questionNumber, score, quizFinished
 
     selectedDifficulty = level
     questionNumber = 0
     score = 0
+    quizFinished = False
 
     resultLabel.pack_forget()
     replayButton.pack_forget()
 
-    answerEntry.pack(pady=10)
-    submitButton.pack(pady=10)
+    answerEntry.pack(pady=12, ipadx=20, ipady=5)
+    submitButton.pack(pady=12)
 
     instruction.config(
         text=f"You selected {level} difficulty"
@@ -282,60 +325,74 @@ def selectDifficulty(level):
     displayProblem(level)
 
 
+# Function to create styled buttons
+def createButton(parent, text, command):
+
+    return tk.Button(
+        parent,
+        text=text,
+        font=(FONT, 11, "bold"),
+        bg=NAVY,
+        fg=WHITE,
+        activebackground="#263B75",
+        activeforeground=WHITE,
+        width=20,
+        relief="flat",
+        cursor="hand2",
+        command=command
+    )
+
+
 # Function to display difficulty menu
 def displayMenu():
 
     tk.Label(
         root,
         text="DIFFICULTY LEVEL",
-        font=("Arial", 16, "bold")
-    ).pack(pady=5)
+        font=(FONT, 15, "bold"),
+        bg=LIGHT_GREY,
+        fg=NAVY
+    ).pack(pady=8)
 
-    tk.Button(
-        root,
-        text="Easy",
-        width=20,
-        command=lambda: selectDifficulty("Easy")
-    ).pack(pady=3)
+    createButton(
+        root, "Easy",
+        lambda: selectDifficulty("Easy")
+    ).pack(pady=4)
 
-    tk.Button(
-        root,
-        text="Moderate",
-        width=20,
-        command=lambda: selectDifficulty("Moderate")
-    ).pack(pady=3)
+    createButton(
+        root, "Moderate",
+        lambda: selectDifficulty("Moderate")
+    ).pack(pady=4)
 
-    tk.Button(
-        root,
-        text="Advanced",
-        width=20,
-        command=lambda: selectDifficulty("Advanced")
-    ).pack(pady=3)
+    createButton(
+        root, "Advanced",
+        lambda: selectDifficulty("Advanced")
+    ).pack(pady=4)
 
 
 # Results label
 resultLabel = tk.Label(
     root,
     text="",
-    font=("Arial", 16, "bold")
+    font=(FONT, 18, "bold"),
+    bg=LIGHT_GREY,
+    fg=NAVY
 )
 
 # Replay button
-replayButton = tk.Button(
+replayButton = createButton(
     root,
-    text="Play Again",
-    width=20,
-    command=replayQuiz
+    "Play Again",
+    replayQuiz
 )
 
 # Submit answer button
-submitButton = tk.Button(
+submitButton = createButton(
     root,
-    text="Submit Answer",
-    width=20,
-    command=checkAnswer
+    "Submit Answer",
+    checkAnswer
 )
-submitButton.pack(pady=10)
+submitButton.pack(pady=12)
 
 # Display the menu
 displayMenu()
