@@ -161,11 +161,8 @@ def addStudent():
     addWindow.resizable(False, False)
 
     heading = tk.Label(
-        addWindow,
-        text="Add New Student",
-        font=(FONT, 20, "bold"),
-        bg=LIGHT_GREY,
-        fg=NAVY
+        addWindow, text="Add New Student",
+        font=(FONT, 20, "bold"), bg=LIGHT_GREY, fg=NAVY
     )
     heading.pack(pady=15)
 
@@ -182,11 +179,8 @@ def addStudent():
 
     for labelText, fieldName in fields:
         label = tk.Label(
-            addWindow,
-            text=labelText,
-            font=(FONT, 10),
-            bg=LIGHT_GREY,
-            fg=NAVY
+            addWindow, text=labelText,
+            font=(FONT, 10), bg=LIGHT_GREY, fg=NAVY
         )
         label.pack(pady=(5, 2))
 
@@ -259,17 +253,90 @@ def addStudent():
 
         addWindow.destroy()
 
-
     saveButton = tk.Button(
-        addWindow,
-        text="Save Student",
+        addWindow, text="Save Student",
+        font=(FONT, 11, "bold"), bg=NAVY,
+        fg=WHITE, width=22, command=saveNewStudent
+    )
+    saveButton.pack(pady=20)
+
+
+def deleteStudent():
+    deleteWindow = tk.Toplevel(root)
+    deleteWindow.title("Delete Student")
+    deleteWindow.geometry("400x250")
+    deleteWindow.configure(bg=LIGHT_GREY)
+    deleteWindow.resizable(False, False)
+
+    heading = tk.Label(
+        deleteWindow,
+        text="Delete Student",
+        font=(FONT, 20, "bold"),
+        bg=LIGHT_GREY,
+        fg=NAVY
+    )
+    heading.pack(pady=20)
+
+    codeLabel = tk.Label(
+        deleteWindow,
+        text="Enter Student Code:",
+        font=(FONT, 11),
+        bg=LIGHT_GREY,
+        fg=NAVY
+    )
+    codeLabel.pack(pady=5)
+
+    codeEntry = tk.Entry(deleteWindow, font=(FONT, 12), width=25)
+    codeEntry.pack(pady=5)
+
+    def confirmDelete():
+        code = codeEntry.get().strip()
+
+        if not code:
+            messagebox.showwarning(
+                "Missing Code",
+                "Please enter a student code.",
+                parent=deleteWindow
+            )
+            return
+
+        for student in studentList:
+            if student["code"] == code:
+                confirm = messagebox.askyesno(
+                    "Confirm Deletion",
+                    f"Are you sure you want to delete {student['name']}?",
+                    parent=deleteWindow
+                )
+
+                if confirm:
+                    studentList.remove(student)
+                    saveStudents()
+
+                    messagebox.showinfo(
+                        "Success",
+                        "Student deleted successfully!",
+                        parent=deleteWindow
+                    )
+                    deleteWindow.destroy()
+
+                return
+
+        messagebox.showerror(
+            "Not Found",
+            "Student code not found.",
+            parent=deleteWindow
+        )
+
+    deleteButton = tk.Button(
+        deleteWindow,
+        text="Delete Student",
         font=(FONT, 11, "bold"),
         bg=NAVY,
         fg=WHITE,
         width=22,
-        command=saveNewStudent
+        command=confirmDelete
     )
-    saveButton.pack(pady=20)
+    deleteButton.pack(pady=20)
 
 
 # Load student records
@@ -278,25 +345,19 @@ loadStudents()
 # Main window
 root = tk.Tk()
 root.title("Student Manager")
-root.geometry("750x750")
+root.geometry("750x800")
 root.resizable(True, True)
 root.configure(bg=LIGHT_GREY)
 
 heading = tk.Label(
-    root,
-    text="Student Manager",
-    font=(FONT, 24, "bold"),
-    bg=LIGHT_GREY,
-    fg=NAVY
+    root, text="Student Manager",
+    font=(FONT, 24, "bold"), bg=LIGHT_GREY, fg=NAVY
 )
 heading.pack(pady=20)
 
 welcomeLabel = tk.Label(
-    root,
-    text="Welcome! Manage and view student records.",
-    font=(FONT, 12),
-    bg=LIGHT_GREY,
-    fg=NAVY
+    root, text="Welcome! Manage and view student records.",
+    font=(FONT, 12), bg=LIGHT_GREY, fg=NAVY
 )
 welcomeLabel.pack(pady=5)
 
@@ -350,5 +411,12 @@ addButton = tk.Button(
     fg=WHITE, width=25, command=addStudent
 )
 addButton.pack(pady=8)
+
+deleteButton = tk.Button(
+    root, text="Delete Student",
+    font=(FONT, 12, "bold"), bg=NAVY,
+    fg=WHITE, width=25, command=deleteStudent
+)
+deleteButton.pack(pady=8)
 
 root.mainloop()
