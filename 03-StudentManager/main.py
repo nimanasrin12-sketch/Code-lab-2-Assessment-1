@@ -4,7 +4,7 @@ import tkinter as tk
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
 # Purpose: Assistance with developing a Tkinter Student Manager application.
-# Prompt: Help me create a Student Manager application with a graphical interface.
+# Prompt: Help me read student records from a text file using Python.
 
 # Colour theme
 NAVY = "#172554"
@@ -13,6 +13,40 @@ WHITE = "#FFFFFF"
 
 # Font settings
 FONT = "Segoe UI"
+
+
+# Function to load student records
+def loadStudents():
+
+    students = []
+
+    with open("studentMarks.txt", "r") as file:
+
+        numberOfStudents = int(file.readline())
+
+        for line in file:
+            data = line.strip().split(",")
+
+            student = {
+                "code": data[0],
+                "name": data[1],
+                "course1": int(data[2]),
+                "course2": int(data[3]),
+                "course3": int(data[4]),
+                "exam": int(data[5])
+            }
+
+            students.append(student)
+
+    return students
+
+
+# Load student records
+studentList = loadStudents()
+
+print("Student records loaded successfully!")
+print("Number of students:", len(studentList))
+
 
 # Create the main application window
 root = tk.Tk()
