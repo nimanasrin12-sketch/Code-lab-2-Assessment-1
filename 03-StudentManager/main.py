@@ -5,7 +5,7 @@ from tkinter import messagebox
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
 # Purpose: Assistance with developing a Tkinter Student Manager application.
-# Prompt: Help me create a Student Manager with student records, viewing all students and searching for individual students.
+# Prompt: Help me create a Student Manager with viewing, searching and finding the highest student marks.
 
 # Colour theme
 NAVY = "#172554"
@@ -131,10 +131,28 @@ def searchStudent():
     )
 
 
+# Function to find the student with the highest exam marks
+def highestMarks():
+
+    if not studentList:
+        messagebox.showinfo("No Records", "No student records available.")
+        return
+
+    highestStudent = max(studentList, key=lambda student: student["exam"])
+
+    details = (
+        f"Student Name: {highestStudent['name']}\n"
+        f"Student Code: {highestStudent['code']}\n"
+        f"Highest Exam Marks: {highestStudent['exam']}"
+    )
+
+    messagebox.showinfo("Highest Marks", details)
+
+
 # Create the main application window
 root = tk.Tk()
 root.title("Student Manager")
-root.geometry("750x550")
+root.geometry("750x600")
 root.resizable(False, False)
 root.config(bg=LIGHT_GREY)
 
@@ -169,7 +187,7 @@ viewButton = tk.Button(
     width=22,
     command=viewAllStudents
 )
-viewButton.pack(pady=10)
+viewButton.pack(pady=8)
 
 # Search section heading
 searchLabel = tk.Label(
@@ -179,7 +197,7 @@ searchLabel = tk.Label(
     bg=LIGHT_GREY,
     fg=NAVY
 )
-searchLabel.pack(pady=12)
+searchLabel.pack(pady=8)
 
 # Student code input
 searchEntry = tk.Entry(
@@ -187,7 +205,7 @@ searchEntry = tk.Entry(
     font=(FONT, 13),
     justify="center"
 )
-searchEntry.pack(pady=8, ipady=5)
+searchEntry.pack(pady=6, ipady=5)
 
 # Search button
 searchButton = tk.Button(
@@ -199,7 +217,19 @@ searchButton = tk.Button(
     width=22,
     command=searchStudent
 )
-searchButton.pack(pady=10)
+searchButton.pack(pady=8)
+
+# Highest marks button
+highestButton = tk.Button(
+    root,
+    text="Find Highest Marks",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    width=22,
+    command=highestMarks
+)
+highestButton.pack(pady=8)
 
 # Run application
 root.mainloop()
