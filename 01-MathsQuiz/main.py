@@ -1,6 +1,7 @@
 
 import tkinter as tk
 import random
+from tkinter import messagebox
 
 # Create the main application window
 root = tk.Tk()
@@ -11,6 +12,7 @@ root.resizable(False, False)
 # Store quiz information
 selectedDifficulty = ""
 correctAnswer = 0
+attempts = 0
 
 # Application heading
 heading = tk.Label(
@@ -72,7 +74,7 @@ def decideOperation():
     return random.choice(["+", "-"])
 
 
-# Function to check the correct answer
+# Function to calculate the correct answer
 def isCorrect(number1, number2, operation):
 
     if operation == "+":
@@ -85,7 +87,9 @@ def isCorrect(number1, number2, operation):
 # Function to display a question
 def displayProblem(level):
 
-    global correctAnswer
+    global correctAnswer, attempts
+
+    attempts = 0
 
     number1, number2 = randomInt(level)
     operation = decideOperation()
@@ -103,6 +107,53 @@ def displayProblem(level):
     answerEntry.delete(0, tk.END)
 
 
+# Function to check the submitted answer
+def checkAnswer():
+
+    global attempts
+
+    try:
+        userAnswer = int(answerEntry.get())
+
+        if userAnswer == correctAnswer:
+
+            messagebox.showinfo(
+                "Result",
+                "Correct answer!"
+            )
+
+            displayProblem(selectedDifficulty)
+
+        else:
+
+            attempts += 1
+
+            if attempts == 1:
+
+                messagebox.showwarning(
+                    "Try Again",
+                    "Incorrect answer. You have one more attempt."
+                )
+
+                answerEntry.delete(0, tk.END)
+
+            else:
+
+                messagebox.showinfo(
+                    "Result",
+                    f"Incorrect! The correct answer is {correctAnswer}."
+                )
+
+                displayProblem(selectedDifficulty)
+
+    except ValueError:
+
+        messagebox.showwarning(
+            "Invalid Input",
+            "Please enter a whole number."
+        )
+
+
 # Function to select difficulty
 def selectDifficulty(level):
 
@@ -115,24 +166,6 @@ def selectDifficulty(level):
     )
 
     displayProblem(level)
-
-
-# Function to check the submitted answer
-def checkAnswer():
-
-    try:
-        userAnswer = int(answerEntry.get())
-
-        if userAnswer == correctAnswer:
-            questionLabel.config(text="Correct answer!")
-
-        else:
-            questionLabel.config(text="Incorrect! Try again.")
-
-    except ValueError:
-        questionLabel.config(
-            text="Please enter a valid number."
-        )
 
 
 # Function to display difficulty menu
