@@ -39,19 +39,19 @@ def loadStudents():
                 studentList.append(student)
 
 
-def viewAllStudents():
-    if not studentList:
+def displayStudentList(title, records):
+    if not records:
         messagebox.showinfo("No Records", "No student records available.")
         return
 
     window = tk.Toplevel(root)
-    window.title("All Students")
+    window.title(title)
     window.geometry("650x500")
     window.configure(bg=LIGHT_GREY)
 
     heading = tk.Label(
         window,
-        text="All Student Records",
+        text=title,
         font=(FONT, 18, "bold"),
         bg=LIGHT_GREY,
         fg=NAVY
@@ -68,7 +68,7 @@ def viewAllStudents():
     )
     textArea.pack(padx=15, pady=10)
 
-    for student in studentList:
+    for student in records:
         details = (
             f"Code: {student['code']}\n"
             f"Name: {student['name']}\n"
@@ -81,6 +81,10 @@ def viewAllStudents():
         textArea.insert(tk.END, details)
 
     textArea.config(state=tk.DISABLED)
+
+
+def viewAllStudents():
+    displayStudentList("All Student Records", studentList)
 
 
 def searchStudent():
@@ -139,13 +143,22 @@ def lowestMarks():
     messagebox.showinfo("Lowest Marks", details)
 
 
+def sortStudents():
+    sortedStudents = sorted(
+        studentList,
+        key=lambda student: student["name"].lower()
+    )
+
+    displayStudentList("Students Sorted by Name (A-Z)", sortedStudents)
+
+
 # Load student records
 loadStudents()
 
 # Main window
 root = tk.Tk()
 root.title("Student Manager")
-root.geometry("750x650")
+root.geometry("750x700")
 root.resizable(True, True)
 root.configure(bg=LIGHT_GREY)
 
@@ -176,7 +189,7 @@ viewButton = tk.Button(
     width=25,
     command=viewAllStudents
 )
-viewButton.pack(pady=12)
+viewButton.pack(pady=10)
 
 searchLabel = tk.Label(
     root,
@@ -187,11 +200,7 @@ searchLabel = tk.Label(
 )
 searchLabel.pack(pady=5)
 
-searchEntry = tk.Entry(
-    root,
-    font=(FONT, 12),
-    width=25
-)
+searchEntry = tk.Entry(root, font=(FONT, 12), width=25)
 searchEntry.pack(pady=5)
 
 searchButton = tk.Button(
@@ -203,7 +212,7 @@ searchButton = tk.Button(
     width=25,
     command=searchStudent
 )
-searchButton.pack(pady=10)
+searchButton.pack(pady=8)
 
 highestButton = tk.Button(
     root,
@@ -214,7 +223,7 @@ highestButton = tk.Button(
     width=25,
     command=highestMarks
 )
-highestButton.pack(pady=10)
+highestButton.pack(pady=8)
 
 lowestButton = tk.Button(
     root,
@@ -225,6 +234,17 @@ lowestButton = tk.Button(
     width=25,
     command=lowestMarks
 )
-lowestButton.pack(pady=10)
+lowestButton.pack(pady=8)
+
+sortButton = tk.Button(
+    root,
+    text="Sort Students by Name (A-Z)",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    width=25,
+    command=sortStudents
+)
+sortButton.pack(pady=8)
 
 root.mainloop()
