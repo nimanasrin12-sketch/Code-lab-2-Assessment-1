@@ -4,26 +4,24 @@ from tkinter import messagebox
 
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
-# Purpose: Assistance with developing a Tkinter Student Manager application.
-# Prompt: Help me create a Student Manager with viewing, searching and finding the highest student marks.
+# Purpose: Assistance with developing the Student Manager application.
 
 # Colour theme
 NAVY = "#172554"
 LIGHT_GREY = "#F0F4F8"
 WHITE = "#FFFFFF"
-
-# Font settings
 FONT = "Segoe UI"
 
+studentList = []
 
-# Function to load student records
+
 def loadStudents():
+    global studentList
 
-    students = []
+    studentList = []
 
     with open("studentMarks.txt", "r") as file:
-
-        numberOfStudents = int(file.readline())
+        numberOfStudents = int(file.readline().strip())
 
         for line in file:
             data = line.strip().split(",")
@@ -38,84 +36,65 @@ def loadStudents():
                     "exam": int(data[5])
                 }
 
-                students.append(student)
-
-    return students
+                studentList.append(student)
 
 
-# Load student records
-studentList = loadStudents()
-
-
-# Function to view all students
 def viewAllStudents():
+    if not studentList:
+        messagebox.showinfo("No Records", "No student records available.")
+        return
 
-    studentWindow = tk.Toplevel(root)
-    studentWindow.title("All Students")
-    studentWindow.geometry("700x450")
-    studentWindow.config(bg=LIGHT_GREY)
+    window = tk.Toplevel(root)
+    window.title("All Students")
+    window.geometry("650x500")
+    window.configure(bg=LIGHT_GREY)
 
-    title = tk.Label(
-        studentWindow,
-        text="ALL STUDENT RECORDS",
-        font=(FONT, 20, "bold"),
-        bg=NAVY,
-        fg=WHITE,
-        pady=15
+    heading = tk.Label(
+        window,
+        text="All Student Records",
+        font=(FONT, 18, "bold"),
+        bg=LIGHT_GREY,
+        fg=NAVY
     )
-    title.pack(fill="x")
+    heading.pack(pady=15)
 
-    records = tk.Text(
-        studentWindow,
+    textArea = tk.Text(
+        window,
         font=(FONT, 11),
         bg=WHITE,
         fg=NAVY,
-        width=80,
-        height=18
+        width=65,
+        height=22
     )
-    records.pack(padx=15, pady=15)
-
-    records.insert(
-        tk.END,
-        f"{'Code':<10}{'Name':<22}{'C1':<7}{'C2':<7}{'C3':<7}{'Exam':<7}\n"
-    )
-
-    records.insert(tk.END, "-" * 65 + "\n")
+    textArea.pack(padx=15, pady=10)
 
     for student in studentList:
-
-        records.insert(
-            tk.END,
-            f"{student['code']:<10}"
-            f"{student['name']:<22}"
-            f"{student['course1']:<7}"
-            f"{student['course2']:<7}"
-            f"{student['course3']:<7}"
-            f"{student['exam']:<7}\n"
+        details = (
+            f"Code: {student['code']}\n"
+            f"Name: {student['name']}\n"
+            f"Course 1: {student['course1']}\n"
+            f"Course 2: {student['course2']}\n"
+            f"Course 3: {student['course3']}\n"
+            f"Exam Marks: {student['exam']}\n"
+            "------------------------------\n"
         )
+        textArea.insert(tk.END, details)
 
-    records.config(state="disabled")
+    textArea.config(state=tk.DISABLED)
 
 
-# Function to search for an individual student
 def searchStudent():
+    code = searchEntry.get().strip()
 
-    studentCode = searchEntry.get().strip()
-
-    if studentCode == "":
-        messagebox.showwarning(
-            "Missing Code",
-            "Please enter a student code."
-        )
+    if not code:
+        messagebox.showwarning("Missing Code", "Please enter a student code.")
         return
 
     for student in studentList:
-
-        if student["code"] == studentCode:
-
+        if student["code"] == code:
             details = (
                 f"Student Code: {student['code']}\n"
-                f"Student Name: {student['name']}\n\n"
+                f"Student Name: {student['name']}\n"
                 f"Course 1: {student['course1']}\n"
                 f"Course 2: {student['course2']}\n"
                 f"Course 3: {student['course3']}\n"
@@ -125,15 +104,10 @@ def searchStudent():
             messagebox.showinfo("Student Details", details)
             return
 
-    messagebox.showerror(
-        "Student Not Found",
-        "No student found with that code."
-    )
+    messagebox.showerror("Not Found", "Student code not found.")
 
 
-# Function to find the student with the highest exam marks
 def highestMarks():
-
     if not studentList:
         messagebox.showinfo("No Records", "No student records available.")
         return
@@ -149,87 +123,108 @@ def highestMarks():
     messagebox.showinfo("Highest Marks", details)
 
 
-# Create the main application window
+def lowestMarks():
+    if not studentList:
+        messagebox.showinfo("No Records", "No student records available.")
+        return
+
+    lowestStudent = min(studentList, key=lambda student: student["exam"])
+
+    details = (
+        f"Student Name: {lowestStudent['name']}\n"
+        f"Student Code: {lowestStudent['code']}\n"
+        f"Lowest Exam Marks: {lowestStudent['exam']}"
+    )
+
+    messagebox.showinfo("Lowest Marks", details)
+
+
+# Load student records
+loadStudents()
+
+# Main window
 root = tk.Tk()
 root.title("Student Manager")
-root.geometry("750x600")
-root.resizable(False, False)
-root.config(bg=LIGHT_GREY)
+root.geometry("750x650")
+root.resizable(True, True)
+root.configure(bg=LIGHT_GREY)
 
-# Application heading
 heading = tk.Label(
     root,
-    text="STUDENT MANAGER",
-    font=(FONT, 26, "bold"),
-    bg=NAVY,
-    fg=WHITE,
-    pady=25
-)
-heading.pack(fill="x")
-
-# Welcome message
-welcomeLabel = tk.Label(
-    root,
-    text="Student Records Management System",
-    font=(FONT, 14),
+    text="Student Manager",
+    font=(FONT, 24, "bold"),
     bg=LIGHT_GREY,
     fg=NAVY
 )
-welcomeLabel.pack(pady=20)
+heading.pack(pady=20)
 
-# View all students button
+welcomeLabel = tk.Label(
+    root,
+    text="Welcome! Manage and view student records.",
+    font=(FONT, 12),
+    bg=LIGHT_GREY,
+    fg=NAVY
+)
+welcomeLabel.pack(pady=5)
+
 viewButton = tk.Button(
     root,
     text="View All Students",
     font=(FONT, 12, "bold"),
     bg=NAVY,
     fg=WHITE,
-    width=22,
+    width=25,
     command=viewAllStudents
 )
-viewButton.pack(pady=8)
+viewButton.pack(pady=12)
 
-# Search section heading
 searchLabel = tk.Label(
     root,
-    text="Search Individual Student",
-    font=(FONT, 14, "bold"),
+    text="Enter Student Code:",
+    font=(FONT, 11),
     bg=LIGHT_GREY,
     fg=NAVY
 )
-searchLabel.pack(pady=8)
+searchLabel.pack(pady=5)
 
-# Student code input
 searchEntry = tk.Entry(
     root,
-    font=(FONT, 13),
-    justify="center"
+    font=(FONT, 12),
+    width=25
 )
-searchEntry.pack(pady=6, ipady=5)
+searchEntry.pack(pady=5)
 
-# Search button
 searchButton = tk.Button(
     root,
     text="Search Student",
     font=(FONT, 12, "bold"),
     bg=NAVY,
     fg=WHITE,
-    width=22,
+    width=25,
     command=searchStudent
 )
-searchButton.pack(pady=8)
+searchButton.pack(pady=10)
 
-# Highest marks button
 highestButton = tk.Button(
     root,
     text="Find Highest Marks",
     font=(FONT, 12, "bold"),
     bg=NAVY,
     fg=WHITE,
-    width=22,
+    width=25,
     command=highestMarks
 )
-highestButton.pack(pady=8)
+highestButton.pack(pady=10)
 
-# Run application
+lowestButton = tk.Button(
+    root,
+    text="Find Lowest Marks",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    width=25,
+    command=lowestMarks
+)
+lowestButton.pack(pady=10)
+
 root.mainloop()
