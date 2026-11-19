@@ -6,13 +6,15 @@ from tkinter import messagebox
 # Create the main application window
 root = tk.Tk()
 root.title("Maths Quiz")
-root.geometry("600x450")
+root.geometry("600x500")
 root.resizable(False, False)
 
 # Store quiz information
 selectedDifficulty = ""
 correctAnswer = 0
 attempts = 0
+questionNumber = 0
+score = 0
 
 # Application heading
 heading = tk.Label(
@@ -20,7 +22,7 @@ heading = tk.Label(
     text="MATHS QUIZ",
     font=("Arial", 24, "bold")
 )
-heading.pack(pady=20)
+heading.pack(pady=15)
 
 # Instructions
 instruction = tk.Label(
@@ -28,7 +30,15 @@ instruction = tk.Label(
     text="Choose your difficulty level:",
     font=("Arial", 14)
 )
-instruction.pack(pady=10)
+instruction.pack(pady=5)
+
+# Question counter
+progressLabel = tk.Label(
+    root,
+    text="Question: 0 / 10     Score: 0",
+    font=("Arial", 12, "bold")
+)
+progressLabel.pack(pady=10)
 
 # Question display
 questionLabel = tk.Label(
@@ -36,7 +46,7 @@ questionLabel = tk.Label(
     text="",
     font=("Arial", 20, "bold")
 )
-questionLabel.pack(pady=20)
+questionLabel.pack(pady=15)
 
 # Answer input box
 answerEntry = tk.Entry(
@@ -84,12 +94,25 @@ def isCorrect(number1, number2, operation):
         return number1 - number2
 
 
+# Function to update the progress display
+def updateProgress():
+
+    progressLabel.config(
+        text=f"Question: {questionNumber} / 10     Score: {score}"
+    )
+
+
 # Function to display a question
 def displayProblem(level):
 
-    global correctAnswer, attempts
+    global correctAnswer, attempts, questionNumber
+
+    if questionNumber == 10:
+        displayResults()
+        return
 
     attempts = 0
+    questionNumber += 1
 
     number1, number2 = randomInt(level)
     operation = decideOperation()
@@ -105,22 +128,35 @@ def displayProblem(level):
     )
 
     answerEntry.delete(0, tk.END)
+    updateProgress()
 
 
 # Function to check the submitted answer
 def checkAnswer():
 
-    global attempts
+    global attempts, score
+
+    if not selectedDifficulty:
+        messagebox.showwarning(
+            "Choose Difficulty",
+            "Please select a difficulty level first."
+        )
+        return
 
     try:
         userAnswer = int(answerEntry.get())
 
         if userAnswer == correctAnswer:
 
-            messagebox.showinfo(
-                "Result",
-                "Correct answer!"
-            )
+            if attempts == 0:
+                score += 10
+                message = "Correct! You earned 10 marks."
+
+            else:
+                score += 5
+                message = "Correct on your second attempt! You earned 5 marks."
+
+            messagebox.showinfo("Correct Answer", message)
 
             displayProblem(selectedDifficulty)
 
@@ -140,8 +176,8 @@ def checkAnswer():
             else:
 
                 messagebox.showinfo(
-                    "Result",
-                    f"Incorrect! The correct answer is {correctAnswer}."
+                    "Incorrect Answer",
+                    f"The correct answer is {correctAnswer}. You earned 0 marks."
                 )
 
                 displayProblem(selectedDifficulty)
@@ -154,12 +190,32 @@ def checkAnswer():
         )
 
 
+# Function to display final results
+def displayResults():
+
+    questionLabel.config(
+        text=f"Quiz Completed! Final Score: {score} / 100"
+    )
+
+    answerEntry.pack_forget()
+    submitButton.pack_forget()
+
+    messagebox.showinfo(
+        "Quiz Results",
+        f"You completed all 10 questions!\n\nYour score: {score} / 100"
+    )
+
+
 # Function to select difficulty
 def selectDifficulty(level):
 
     global selectedDifficulty
+    global questionNumber
+    global score
 
     selectedDifficulty = level
+    questionNumber = 0
+    score = 0
 
     instruction.config(
         text=f"You selected {level} difficulty"
@@ -213,3 +269,4 @@ displayMenu()
 
 # Run application
 root.mainloop()
+
