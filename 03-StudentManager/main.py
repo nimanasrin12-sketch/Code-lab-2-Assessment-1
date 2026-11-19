@@ -1,10 +1,11 @@
 
 import tkinter as tk
+from tkinter import messagebox
 
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
 # Purpose: Assistance with developing a Tkinter Student Manager application.
-# Prompt: Help me create a Student Manager with student records, viewing and managing student information.
+# Prompt: Help me create a Student Manager with student records, viewing all students and searching for individual students.
 
 # Colour theme
 NAVY = "#172554"
@@ -96,6 +97,40 @@ def viewAllStudents():
     records.config(state="disabled")
 
 
+# Function to search for an individual student
+def searchStudent():
+
+    studentCode = searchEntry.get().strip()
+
+    if studentCode == "":
+        messagebox.showwarning(
+            "Missing Code",
+            "Please enter a student code."
+        )
+        return
+
+    for student in studentList:
+
+        if student["code"] == studentCode:
+
+            details = (
+                f"Student Code: {student['code']}\n"
+                f"Student Name: {student['name']}\n\n"
+                f"Course 1: {student['course1']}\n"
+                f"Course 2: {student['course2']}\n"
+                f"Course 3: {student['course3']}\n"
+                f"Exam Marks: {student['exam']}"
+            )
+
+            messagebox.showinfo("Student Details", details)
+            return
+
+    messagebox.showerror(
+        "Student Not Found",
+        "No student found with that code."
+    )
+
+
 # Create the main application window
 root = tk.Tk()
 root.title("Student Manager")
@@ -122,7 +157,7 @@ welcomeLabel = tk.Label(
     bg=LIGHT_GREY,
     fg=NAVY
 )
-welcomeLabel.pack(pady=30)
+welcomeLabel.pack(pady=20)
 
 # View all students button
 viewButton = tk.Button(
@@ -134,7 +169,37 @@ viewButton = tk.Button(
     width=22,
     command=viewAllStudents
 )
-viewButton.pack(pady=15)
+viewButton.pack(pady=10)
+
+# Search section heading
+searchLabel = tk.Label(
+    root,
+    text="Search Individual Student",
+    font=(FONT, 14, "bold"),
+    bg=LIGHT_GREY,
+    fg=NAVY
+)
+searchLabel.pack(pady=12)
+
+# Student code input
+searchEntry = tk.Entry(
+    root,
+    font=(FONT, 13),
+    justify="center"
+)
+searchEntry.pack(pady=8, ipady=5)
+
+# Search button
+searchButton = tk.Button(
+    root,
+    text="Search Student",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    width=22,
+    command=searchStudent
+)
+searchButton.pack(pady=10)
 
 # Run application
 root.mainloop()
