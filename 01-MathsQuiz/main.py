@@ -194,16 +194,68 @@ def checkAnswer():
 def displayResults():
 
     questionLabel.config(
-        text=f"Quiz Completed! Final Score: {score} / 100"
+        text="QUIZ COMPLETED!"
     )
 
     answerEntry.pack_forget()
     submitButton.pack_forget()
 
-    messagebox.showinfo(
-        "Quiz Results",
-        f"You completed all 10 questions!\n\nYour score: {score} / 100"
+    if score >= 90:
+        grade = "A+"
+        rank = "Excellent"
+
+    elif score >= 80:
+        grade = "A"
+        rank = "Very Good"
+
+    elif score >= 70:
+        grade = "B"
+        rank = "Good"
+
+    elif score >= 60:
+        grade = "C"
+        rank = "Average"
+
+    elif score >= 50:
+        grade = "D"
+        rank = "Pass"
+
+    else:
+        grade = "F"
+        rank = "Needs Improvement"
+
+    resultLabel.config(
+        text=f"Final Score: {score}/100\nGrade: {grade}\nRank: {rank}"
     )
+
+    resultLabel.pack(pady=15)
+    replayButton.pack(pady=10)
+
+
+# Function to restart the quiz
+def replayQuiz():
+
+    global questionNumber, score, attempts
+
+    questionNumber = 0
+    score = 0
+    attempts = 0
+
+    resultLabel.pack_forget()
+    replayButton.pack_forget()
+
+    answerEntry.pack(pady=10)
+    submitButton.pack(pady=10)
+
+    instruction.config(
+        text="Choose your difficulty level:"
+    )
+
+    progressLabel.config(
+        text="Question: 0 / 10     Score: 0"
+    )
+
+    questionLabel.config(text="")
 
 
 # Function to select difficulty
@@ -216,6 +268,12 @@ def selectDifficulty(level):
     selectedDifficulty = level
     questionNumber = 0
     score = 0
+
+    resultLabel.pack_forget()
+    replayButton.pack_forget()
+
+    answerEntry.pack(pady=10)
+    submitButton.pack(pady=10)
 
     instruction.config(
         text=f"You selected {level} difficulty"
@@ -255,6 +313,21 @@ def displayMenu():
     ).pack(pady=3)
 
 
+# Results label
+resultLabel = tk.Label(
+    root,
+    text="",
+    font=("Arial", 16, "bold")
+)
+
+# Replay button
+replayButton = tk.Button(
+    root,
+    text="Play Again",
+    width=20,
+    command=replayQuiz
+)
+
 # Submit answer button
 submitButton = tk.Button(
     root,
@@ -269,4 +342,3 @@ displayMenu()
 
 # Run application
 root.mainloop()
-
