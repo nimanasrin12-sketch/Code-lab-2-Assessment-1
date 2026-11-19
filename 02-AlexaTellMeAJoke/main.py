@@ -134,5 +134,16 @@ nextButton = tk.Button(
 )
 nextButton.pack(pady=8)
 
+# Quit button
+quitButton = tk.Button(
+    root,
+    text="Quit",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    command=root.destroy
+)
+quitButton.pack(pady=8)
+
 # Run application
 root.mainloop()
