@@ -8,13 +8,17 @@ root.title("Maths Quiz")
 root.geometry("600x450")
 root.resizable(False, False)
 
+# Store quiz information
+selectedDifficulty = ""
+correctAnswer = 0
+
 # Application heading
 heading = tk.Label(
     root,
     text="MATHS QUIZ",
     font=("Arial", 24, "bold")
 )
-heading.pack(pady=30)
+heading.pack(pady=20)
 
 # Instructions
 instruction = tk.Label(
@@ -22,7 +26,23 @@ instruction = tk.Label(
     text="Choose your difficulty level:",
     font=("Arial", 14)
 )
-instruction.pack(pady=15)
+instruction.pack(pady=10)
+
+# Question display
+questionLabel = tk.Label(
+    root,
+    text="",
+    font=("Arial", 20, "bold")
+)
+questionLabel.pack(pady=20)
+
+# Answer input box
+answerEntry = tk.Entry(
+    root,
+    font=("Arial", 16),
+    justify="center"
+)
+answerEntry.pack(pady=10)
 
 
 # Function to generate random numbers
@@ -49,20 +69,70 @@ def randomInt(difficulty):
 # Function to choose addition or subtraction
 def decideOperation():
 
-    operation = random.choice(["+", "-"])
+    return random.choice(["+", "-"])
 
-    return operation
+
+# Function to check the correct answer
+def isCorrect(number1, number2, operation):
+
+    if operation == "+":
+        return number1 + number2
+
+    else:
+        return number1 - number2
+
+
+# Function to display a question
+def displayProblem(level):
+
+    global correctAnswer
+
+    number1, number2 = randomInt(level)
+    operation = decideOperation()
+
+    correctAnswer = isCorrect(
+        number1,
+        number2,
+        operation
+    )
+
+    questionLabel.config(
+        text=f"{number1} {operation} {number2} = ?"
+    )
+
+    answerEntry.delete(0, tk.END)
 
 
 # Function to select difficulty
 def selectDifficulty(level):
 
-    number1, number2 = randomInt(level)
-    operation = decideOperation()
+    global selectedDifficulty
+
+    selectedDifficulty = level
 
     instruction.config(
-        text=f"{level}: {number1} {operation} {number2}"
+        text=f"You selected {level} difficulty"
     )
+
+    displayProblem(level)
+
+
+# Function to check the submitted answer
+def checkAnswer():
+
+    try:
+        userAnswer = int(answerEntry.get())
+
+        if userAnswer == correctAnswer:
+            questionLabel.config(text="Correct answer!")
+
+        else:
+            questionLabel.config(text="Incorrect! Try again.")
+
+    except ValueError:
+        questionLabel.config(
+            text="Please enter a valid number."
+        )
 
 
 # Function to display difficulty menu
@@ -72,29 +142,38 @@ def displayMenu():
         root,
         text="DIFFICULTY LEVEL",
         font=("Arial", 16, "bold")
-    ).pack(pady=10)
+    ).pack(pady=5)
 
     tk.Button(
         root,
         text="Easy",
         width=20,
         command=lambda: selectDifficulty("Easy")
-    ).pack(pady=5)
+    ).pack(pady=3)
 
     tk.Button(
         root,
         text="Moderate",
         width=20,
         command=lambda: selectDifficulty("Moderate")
-    ).pack(pady=5)
+    ).pack(pady=3)
 
     tk.Button(
         root,
         text="Advanced",
         width=20,
         command=lambda: selectDifficulty("Advanced")
-    ).pack(pady=5)
+    ).pack(pady=3)
 
+
+# Submit answer button
+submitButton = tk.Button(
+    root,
+    text="Submit Answer",
+    width=20,
+    command=checkAnswer
+)
+submitButton.pack(pady=10)
 
 # Display the menu
 displayMenu()
