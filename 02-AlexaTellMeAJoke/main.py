@@ -55,10 +55,16 @@ def showPunchline():
         jokeLabel.config(text=currentJoke[1])
 
 
+# Function to display the next joke
+def nextJoke():
+
+    displayJoke()
+
+
 # Create the main application window
 root = tk.Tk()
 root.title("Alexa Tell Me a Joke")
-root.geometry("650x500")
+root.geometry("650x550")
 root.resizable(False, False)
 root.config(bg=LIGHT_GREY)
 
@@ -81,7 +87,7 @@ welcomeLabel = tk.Label(
     bg=LIGHT_GREY,
     fg=NAVY
 )
-welcomeLabel.pack(pady=30)
+welcomeLabel.pack(pady=25)
 
 # Joke display
 jokeLabel = tk.Label(
@@ -93,7 +99,7 @@ jokeLabel = tk.Label(
     wraplength=500,
     height=3
 )
-jokeLabel.pack(pady=25)
+jokeLabel.pack(pady=20)
 
 # Tell me a joke button
 jokeButton = tk.Button(
@@ -104,7 +110,7 @@ jokeButton = tk.Button(
     fg=WHITE,
     command=displayJoke
 )
-jokeButton.pack(pady=15)
+jokeButton.pack(pady=8)
 
 # Show punchline button
 punchlineButton = tk.Button(
@@ -115,7 +121,18 @@ punchlineButton = tk.Button(
     fg=WHITE,
     command=showPunchline
 )
-punchlineButton.pack(pady=10)
+punchlineButton.pack(pady=8)
+
+# Next joke button
+nextButton = tk.Button(
+    root,
+    text="Next Joke",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    command=nextJoke
+)
+nextButton.pack(pady=8)
 
 # Run application
 root.mainloop()
