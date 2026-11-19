@@ -5,7 +5,7 @@ import random
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
 # Purpose: Assistance with developing a Tkinter joke application,
-# including loading and displaying random jokes.
+# including loading, displaying and revealing random jokes.
 
 # Colour theme
 NAVY = "#172554"
@@ -46,6 +46,13 @@ def displayJoke():
     currentJoke = random.choice(jokeList)
 
     jokeLabel.config(text=currentJoke[0])
+
+
+# Function to show the joke punchline
+def showPunchline():
+
+    if currentJoke is not None:
+        jokeLabel.config(text=currentJoke[1])
 
 
 # Create the main application window
@@ -98,6 +105,17 @@ jokeButton = tk.Button(
     command=displayJoke
 )
 jokeButton.pack(pady=15)
+
+# Show punchline button
+punchlineButton = tk.Button(
+    root,
+    text="Show Punchline",
+    font=(FONT, 12, "bold"),
+    bg=NAVY,
+    fg=WHITE,
+    command=showPunchline
+)
+punchlineButton.pack(pady=10)
 
 # Run application
 root.mainloop()
