@@ -46,13 +46,22 @@ def randomInt(difficulty):
     return number1, number2
 
 
+# Function to choose addition or subtraction
+def decideOperation():
+
+    operation = random.choice(["+", "-"])
+
+    return operation
+
+
 # Function to select difficulty
 def selectDifficulty(level):
 
     number1, number2 = randomInt(level)
+    operation = decideOperation()
 
     instruction.config(
-        text=f"{level}: Example numbers: {number1} and {number2}"
+        text=f"{level}: {number1} {operation} {number2}"
     )
 
 
