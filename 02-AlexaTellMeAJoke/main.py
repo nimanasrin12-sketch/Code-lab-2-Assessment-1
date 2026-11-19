@@ -1,5 +1,6 @@
 
 import tkinter as tk
+import random
 
 # AI assistance acknowledgement:
 # Tool: ChatGPT (OpenAI)
@@ -12,6 +13,28 @@ WHITE = "#FFFFFF"
 
 # Font settings
 FONT = "Segoe UI"
+
+
+# Function to load jokes from the text file
+def loadJokes():
+
+    jokes = []
+
+    with open("randomJokes.txt", "r") as file:
+
+        for line in file:
+            line = line.strip()
+
+            if "?" in line:
+                setup, punchline = line.split("?", 1)
+                jokes.append((setup + "?", punchline))
+
+    return jokes
+
+
+# Load all jokes
+jokeList = loadJokes()
+
 
 # Create the main application window
 root = tk.Tk()
