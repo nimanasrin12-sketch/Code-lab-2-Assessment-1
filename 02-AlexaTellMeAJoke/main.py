@@ -1,28 +1,21 @@
 
 import tkinter as tk
 import random
+from PIL import Image, ImageTk
 
-# AI assistance acknowledgement:
-# Tool: ChatGPT (OpenAI)
-# Purpose: Assistance with developing a Tkinter joke application,
-# including loading, displaying and revealing random jokes.
+# Code Lab 2 - Assessment 1
+# Project 2: Alexa Tell Me a Joke
 
-# Colour theme
 NAVY = "#172554"
 LIGHT_GREY = "#F0F4F8"
 WHITE = "#FFFFFF"
 
-# Font settings
 FONT = "Segoe UI"
 
-
-# Function to load jokes from the text file
 def loadJokes():
-
     jokes = []
 
     with open("randomJokes.txt", "r") as file:
-
         for line in file:
             line = line.strip()
 
@@ -32,41 +25,34 @@ def loadJokes():
 
     return jokes
 
-
-# Load all jokes
 jokeList = loadJokes()
 currentJoke = None
 
-
-# Function to display a random joke
 def displayJoke():
-
     global currentJoke
 
     currentJoke = random.choice(jokeList)
-
     jokeLabel.config(text=currentJoke[0])
 
-
-# Function to show the joke punchline
 def showPunchline():
-
     if currentJoke is not None:
         jokeLabel.config(text=currentJoke[1])
 
-
-# Function to display the next joke
 def nextJoke():
-
     displayJoke()
 
-
-# Create the main application window
 root = tk.Tk()
 root.title("Alexa Tell Me a Joke")
 root.geometry("650x550")
 root.resizable(False, False)
-root.config(bg=LIGHT_GREY)
+
+# Background image
+backgroundImage = Image.open("joke_background.png")
+backgroundImage = backgroundImage.resize((650, 550), Image.Resampling.LANCZOS)
+backgroundPhoto = ImageTk.PhotoImage(backgroundImage)
+
+backgroundLabel = tk.Label(root, image=backgroundPhoto)
+backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
 # Application heading
 heading = tk.Label(
@@ -145,5 +131,4 @@ quitButton = tk.Button(
 )
 quitButton.pack(pady=8)
 
-# Run application
 root.mainloop()
