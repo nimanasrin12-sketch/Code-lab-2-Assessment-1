@@ -1,10 +1,5 @@
-
 import tkinter as tk
 from tkinter import messagebox
-
-# AI assistance acknowledgement:
-# Tool: ChatGPT (OpenAI)
-# Purpose: Assistance with developing the Student Manager application.
 
 # Colour theme
 NAVY = "#172554"
