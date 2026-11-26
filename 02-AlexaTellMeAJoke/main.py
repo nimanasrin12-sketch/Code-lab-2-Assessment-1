@@ -32,15 +32,18 @@ def displayJoke():
     global currentJoke
 
     currentJoke = random.choice(jokeList)
+
     jokeLabel.config(text=currentJoke[0])
+    punchlineLabel.config(text="")
 
 def showPunchline():
     if currentJoke is not None:
-        jokeLabel.config(text=currentJoke[1])
+        punchlineLabel.config(text=currentJoke[1])
 
 def nextJoke():
     displayJoke()
 
+# Main application window
 root = tk.Tk()
 root.title("Alexa Tell Me a Joke")
 root.geometry("650x550")
@@ -48,7 +51,9 @@ root.resizable(False, False)
 
 # Background image
 backgroundImage = Image.open("joke_background.png")
-backgroundImage = backgroundImage.resize((650, 550), Image.Resampling.LANCZOS)
+backgroundImage = backgroundImage.resize(
+    (650, 550), Image.Resampling.LANCZOS
+)
 backgroundPhoto = ImageTk.PhotoImage(backgroundImage)
 
 backgroundLabel = tk.Label(root, image=backgroundPhoto)
@@ -61,7 +66,7 @@ heading = tk.Label(
     font=(FONT, 25, "bold"),
     bg=NAVY,
     fg=WHITE,
-    pady=25
+    pady=20
 )
 heading.pack(fill="x")
 
@@ -73,9 +78,9 @@ welcomeLabel = tk.Label(
     bg=LIGHT_GREY,
     fg=NAVY
 )
-welcomeLabel.pack(pady=25)
+welcomeLabel.pack(pady=15)
 
-# Joke display
+# Joke question
 jokeLabel = tk.Label(
     root,
     text="Click the button to hear a joke!",
@@ -83,9 +88,21 @@ jokeLabel = tk.Label(
     bg=WHITE,
     fg=NAVY,
     wraplength=500,
-    height=3
+    height=2
 )
-jokeLabel.pack(pady=20)
+jokeLabel.pack(pady=12)
+
+# Joke punchline
+punchlineLabel = tk.Label(
+    root,
+    text="",
+    font=(FONT, 14, "bold"),
+    bg=NAVY,
+    fg="#FFD700",
+    wraplength=500,
+    height=2
+)
+punchlineLabel.pack(pady=8)
 
 # Tell me a joke button
 jokeButton = tk.Button(
@@ -96,7 +113,7 @@ jokeButton = tk.Button(
     fg=WHITE,
     command=displayJoke
 )
-jokeButton.pack(pady=8)
+jokeButton.pack(pady=5)
 
 # Show punchline button
 punchlineButton = tk.Button(
@@ -107,7 +124,7 @@ punchlineButton = tk.Button(
     fg=WHITE,
     command=showPunchline
 )
-punchlineButton.pack(pady=8)
+punchlineButton.pack(pady=5)
 
 # Next joke button
 nextButton = tk.Button(
@@ -118,7 +135,7 @@ nextButton = tk.Button(
     fg=WHITE,
     command=nextJoke
 )
-nextButton.pack(pady=8)
+nextButton.pack(pady=5)
 
 # Quit button
 quitButton = tk.Button(
@@ -129,6 +146,6 @@ quitButton = tk.Button(
     fg=WHITE,
     command=root.destroy
 )
-quitButton.pack(pady=8)
+quitButton.pack(pady=5)
 
 root.mainloop()
