@@ -1,558 +1,804 @@
-import tkinter as tk
-from tkinter import messagebox
 
-# Colour theme
+import tkinter as tk
+from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
+import os
+
+# Student Manager - Exercise 3
+
+# Application colours and font
 NAVY = "#172554"
-LIGHT_GREY = "#F0F4F8"
+GOLD = "#D6A642"
 WHITE = "#FFFFFF"
+LIGHT = "#F4F7FC"
 FONT = "Segoe UI"
 
-studentList = []
+DATA_FILE = "studentMarks.txt"
 
 
+# Load student records from the text file
 def loadStudents():
-    global studentList
-    studentList = []
+    students = []
 
-    with open("studentMarks.txt", "r") as file:
-        numberOfStudents = int(file.readline().strip())
+    if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "w") as file:
+            file.write("0\n")
+        return students
 
-        for line in file:
-            data = line.strip().split(",")
+    with open(DATA_FILE, "r") as file:
+        lines = file.readlines()
 
-            if len(data) == 6:
-                student = {
-                    "code": data[0],
-                    "name": data[1],
-                    "course1": int(data[2]),
-                    "course2": int(data[3]),
-                    "course3": int(data[4]),
-                    "exam": int(data[5])
-                }
-                studentList.append(student)
+    if lines and lines[0].strip().isdigit():
+        lines = lines[1:]
+
+    for line in lines:
+        parts = line.strip().split(",")
+
+        if len(parts) == 6:
+            try:
+                students.append({
+                    "code": parts[0],
+                    "name": parts[1],
+                    "c1": int(parts[2]),
+                    "c2": int(parts[3]),
+                    "c3": int(parts[4]),
+                    "exam": int(parts[5])
+                })
+            except ValueError:
+                continue
+
+    return students
 
 
+# Save all student records into the file
 def saveStudents():
-    with open("studentMarks.txt", "w") as file:
-        file.write(str(len(studentList)) + "\n")
+    with open(DATA_FILE, "w") as file:
+        file.write(str(len(students)) + "\n")
 
-        for student in studentList:
+        for s in students:
             file.write(
-                f"{student['code']},{student['name']},"
-                f"{student['course1']},{student['course2']},"
-                f"{student['course3']},{student['exam']}\n"
+                f"{s['code']},{s['name']},{s['c1']},"
+                f"{s['c2']},{s['c3']},{s['exam']}\n"
             )
 
 
-def displayStudentList(title, records):
-    if not records:
-        messagebox.showinfo("No Records", "No student records available.")
-        return
+# Calculate student marks and grades
+def getTotal(s):
+    return s["c1"] + s["c2"] + s["c3"] + s["exam"]
 
-    window = tk.Toplevel(root)
-    window.title(title)
-    window.geometry("650x500")
-    window.configure(bg=LIGHT_GREY)
 
-    heading = tk.Label(
-        window, text=title, font=(FONT, 18, "bold"),
-        bg=LIGHT_GREY, fg=NAVY
-    )
-    heading.pack(pady=15)
+def getPercentage(s):
+    return getTotal(s) / 160 * 100
 
-    textArea = tk.Text(
-        window, font=(FONT, 11), bg=WHITE,
-        fg=NAVY, width=65, height=22
-    )
-    textArea.pack(padx=15, pady=10)
 
-    for student in records:
-        details = (
-            f"Code: {student['code']}\n"
-            f"Name: {student['name']}\n"
-            f"Course 1: {student['course1']}\n"
-            f"Course 2: {student['course2']}\n"
-            f"Course 3: {student['course3']}\n"
-            f"Exam Marks: {student['exam']}\n"
-            "------------------------------\n"
-        )
-        textArea.insert(tk.END, details)
+def getGrade(s):
+    percentage = getPercentage(s)
 
-    textArea.config(state=tk.DISABLED)
+    if percentage >= 70:
+        return "A"
+    elif percentage >= 60:
+        return "B"
+    elif percentage >= 50:
+        return "C"
+    elif percentage >= 40:
+        return "D"
+    return "F"
 
 
-def viewAllStudents():
-    displayStudentList("All Student Records", studentList)
+students = loadStudents()
 
 
-def searchStudent():
-    code = searchEntry.get().strip()
-
-    if not code:
-        messagebox.showwarning("Missing Code", "Please enter a student code.")
-        return
-
-    for student in studentList:
-        if student["code"] == code:
-            details = (
-                f"Student Code: {student['code']}\n"
-                f"Student Name: {student['name']}\n"
-                f"Course 1: {student['course1']}\n"
-                f"Course 2: {student['course2']}\n"
-                f"Course 3: {student['course3']}\n"
-                f"Exam Marks: {student['exam']}"
-            )
-            messagebox.showinfo("Student Details", details)
-            return
-
-    messagebox.showerror("Not Found", "Student code not found.")
-
-
-def highestMarks():
-    if not studentList:
-        messagebox.showinfo("No Records", "No student records available.")
-        return
-
-    highestStudent = max(studentList, key=lambda student: student["exam"])
-
-    messagebox.showinfo(
-        "Highest Marks",
-        f"Student Name: {highestStudent['name']}\n"
-        f"Student Code: {highestStudent['code']}\n"
-        f"Highest Exam Marks: {highestStudent['exam']}"
-    )
-
-
-def lowestMarks():
-    if not studentList:
-        messagebox.showinfo("No Records", "No student records available.")
-        return
-
-    lowestStudent = min(studentList, key=lambda student: student["exam"])
-
-    messagebox.showinfo(
-        "Lowest Marks",
-        f"Student Name: {lowestStudent['name']}\n"
-        f"Student Code: {lowestStudent['code']}\n"
-        f"Lowest Exam Marks: {lowestStudent['exam']}"
-    )
-
-
-def sortStudents():
-    sortedStudents = sorted(
-        studentList,
-        key=lambda student: student["name"].lower()
-    )
-    displayStudentList("Students Sorted by Name (A-Z)", sortedStudents)
-
-
-def addStudent():
-    addWindow = tk.Toplevel(root)
-    addWindow.title("Add New Student")
-    addWindow.geometry("400x520")
-    addWindow.configure(bg=LIGHT_GREY)
-    addWindow.resizable(False, False)
-
-    heading = tk.Label(
-        addWindow, text="Add New Student",
-        font=(FONT, 20, "bold"), bg=LIGHT_GREY, fg=NAVY
-    )
-    heading.pack(pady=15)
-
-    fields = [
-        ("Student Code", "code"),
-        ("Student Name", "name"),
-        ("Course 1 Marks", "course1"),
-        ("Course 2 Marks", "course2"),
-        ("Course 3 Marks", "course3"),
-        ("Exam Marks", "exam")
-    ]
-
-    entries = {}
-
-    for labelText, fieldName in fields:
-        label = tk.Label(
-            addWindow, text=labelText,
-            font=(FONT, 10), bg=LIGHT_GREY, fg=NAVY
-        )
-        label.pack(pady=(5, 2))
-
-        entry = tk.Entry(addWindow, font=(FONT, 11), width=28)
-        entry.pack(pady=2)
-        entries[fieldName] = entry
-
-    def saveNewStudent():
-        code = entries["code"].get().strip()
-        name = entries["name"].get().strip()
-
-        if not code or not name:
-            messagebox.showwarning(
-                "Missing Details",
-                "Please enter the student code and name.",
-                parent=addWindow
-            )
-            return
-
-        for student in studentList:
-            if student["code"] == code:
-                messagebox.showerror(
-                    "Duplicate Code",
-                    "This student code already exists.",
-                    parent=addWindow
-                )
-                return
-
-        try:
-            course1 = int(entries["course1"].get())
-            course2 = int(entries["course2"].get())
-            course3 = int(entries["course3"].get())
-            exam = int(entries["exam"].get())
-        except ValueError:
-            messagebox.showerror(
-                "Invalid Marks",
-                "Please enter whole numbers for all marks.",
-                parent=addWindow
-            )
-            return
-
-        marks = [course1, course2, course3, exam]
-
-        if any(mark < 0 or mark > 100 for mark in marks):
-            messagebox.showerror(
-                "Invalid Marks",
-                "Marks must be between 0 and 100.",
-                parent=addWindow
-            )
-            return
-
-        newStudent = {
-            "code": code,
-            "name": name,
-            "course1": course1,
-            "course2": course2,
-            "course3": course3,
-            "exam": exam
-        }
-
-        studentList.append(newStudent)
-        saveStudents()
-
-        messagebox.showinfo(
-            "Success",
-            "New student added successfully!",
-            parent=addWindow
-        )
-        addWindow.destroy()
-
-    saveButton = tk.Button(
-        addWindow, text="Save Student",
-        font=(FONT, 11, "bold"), bg=NAVY,
-        fg=WHITE, width=22, command=saveNewStudent
-    )
-    saveButton.pack(pady=20)
-
-
-def deleteStudent():
-    deleteWindow = tk.Toplevel(root)
-    deleteWindow.title("Delete Student")
-    deleteWindow.geometry("400x250")
-    deleteWindow.configure(bg=LIGHT_GREY)
-    deleteWindow.resizable(False, False)
-
-    heading = tk.Label(
-        deleteWindow, text="Delete Student",
-        font=(FONT, 20, "bold"), bg=LIGHT_GREY, fg=NAVY
-    )
-    heading.pack(pady=20)
-
-    codeLabel = tk.Label(
-        deleteWindow, text="Enter Student Code:",
-        font=(FONT, 11), bg=LIGHT_GREY, fg=NAVY
-    )
-    codeLabel.pack(pady=5)
-
-    codeEntry = tk.Entry(deleteWindow, font=(FONT, 12), width=25)
-    codeEntry.pack(pady=5)
-
-    def confirmDelete():
-        code = codeEntry.get().strip()
-
-        if not code:
-            messagebox.showwarning(
-                "Missing Code", "Please enter a student code.",
-                parent=deleteWindow
-            )
-            return
-
-        for student in studentList:
-            if student["code"] == code:
-                confirm = messagebox.askyesno(
-                    "Confirm Deletion",
-                    f"Are you sure you want to delete {student['name']}?",
-                    parent=deleteWindow
-                )
-
-                if confirm:
-                    studentList.remove(student)
-                    saveStudents()
-                    messagebox.showinfo(
-                        "Success", "Student deleted successfully!",
-                        parent=deleteWindow
-                    )
-                    deleteWindow.destroy()
-                return
-
-        messagebox.showerror(
-            "Not Found", "Student code not found.",
-            parent=deleteWindow
-        )
-
-    deleteButton = tk.Button(
-        deleteWindow, text="Delete Student",
-        font=(FONT, 11, "bold"), bg=NAVY,
-        fg=WHITE, width=22, command=confirmDelete
-    )
-    deleteButton.pack(pady=20)
-
-
-def updateStudent():
-    updateWindow = tk.Toplevel(root)
-    updateWindow.title("Update Student")
-    updateWindow.geometry("420x540")
-    updateWindow.configure(bg=LIGHT_GREY)
-    updateWindow.resizable(False, False)
-
-    heading = tk.Label(
-        updateWindow, text="Update Student Details",
-        font=(FONT, 18, "bold"), bg=LIGHT_GREY, fg=NAVY
-    )
-    heading.pack(pady=15)
-
-    codeLabel = tk.Label(
-        updateWindow, text="Enter Student Code:",
-        font=(FONT, 11), bg=LIGHT_GREY, fg=NAVY
-    )
-    codeLabel.pack(pady=5)
-
-    codeEntry = tk.Entry(updateWindow, font=(FONT, 11), width=28)
-    codeEntry.pack(pady=5)
-
-    entries = {}
-
-    fields = [
-        ("Student Name", "name"),
-        ("Course 1 Marks", "course1"),
-        ("Course 2 Marks", "course2"),
-        ("Course 3 Marks", "course3"),
-        ("Exam Marks", "exam")
-    ]
-
-    for labelText, fieldName in fields:
-        label = tk.Label(
-            updateWindow, text=labelText,
-            font=(FONT, 10), bg=LIGHT_GREY, fg=NAVY
-        )
-        label.pack(pady=(7, 2))
-
-        entry = tk.Entry(updateWindow, font=(FONT, 11), width=28)
-        entry.pack(pady=2)
-        entries[fieldName] = entry
-
-    selectedStudent = {"student": None}
-
-    def findStudent():
-        code = codeEntry.get().strip()
-
-        if not code:
-            messagebox.showwarning(
-                "Missing Code",
-                "Please enter a student code.",
-                parent=updateWindow
-            )
-            return
-
-        for student in studentList:
-            if student["code"] == code:
-                selectedStudent["student"] = student
-
-                for fieldName in entries:
-                    entries[fieldName].delete(0, tk.END)
-                    entries[fieldName].insert(
-                        0, str(student[fieldName])
-                    )
-
-                messagebox.showinfo(
-                    "Student Found",
-                    "Student details loaded. You can now edit them.",
-                    parent=updateWindow
-                )
-                return
-
-        messagebox.showerror(
-            "Not Found",
-            "Student code not found.",
-            parent=updateWindow
-        )
-
-    def saveUpdatedStudent():
-        student = selectedStudent["student"]
-
-        if student is None:
-            messagebox.showwarning(
-                "Find Student First",
-                "Please find a student before saving changes.",
-                parent=updateWindow
-            )
-            return
-
-        name = entries["name"].get().strip()
-
-        if not name:
-            messagebox.showwarning(
-                "Missing Name",
-                "Please enter the student's name.",
-                parent=updateWindow
-            )
-            return
-
-        try:
-            course1 = int(entries["course1"].get())
-            course2 = int(entries["course2"].get())
-            course3 = int(entries["course3"].get())
-            exam = int(entries["exam"].get())
-        except ValueError:
-            messagebox.showerror(
-                "Invalid Marks",
-                "Please enter whole numbers for all marks.",
-                parent=updateWindow
-            )
-            return
-
-        marks = [course1, course2, course3, exam]
-
-        if any(mark < 0 or mark > 100 for mark in marks):
-            messagebox.showerror(
-                "Invalid Marks",
-                "Marks must be between 0 and 100.",
-                parent=updateWindow
-            )
-            return
-
-        student["name"] = name
-        student["course1"] = course1
-        student["course2"] = course2
-        student["course3"] = course3
-        student["exam"] = exam
-
-        saveStudents()
-
-        messagebox.showinfo(
-            "Success",
-            "Student details updated successfully!",
-            parent=updateWindow
-        )
-        updateWindow.destroy()
-
-    findButton = tk.Button(
-        updateWindow, text="Find Student",
-        font=(FONT, 10, "bold"), bg=NAVY,
-        fg=WHITE, width=22, command=findStudent
-    )
-    findButton.pack(pady=10)
-
-    saveButton = tk.Button(
-        updateWindow, text="Save Changes",
-        font=(FONT, 10, "bold"), bg=NAVY,
-        fg=WHITE, width=22, command=saveUpdatedStudent
-    )
-    saveButton.pack(pady=10)
-
-
-# Load student records
-loadStudents()
-
-# Main window
+# Create the main application window
 root = tk.Tk()
 root.title("Student Manager")
-root.geometry("750x850")
+root.geometry("1100x620")
+root.minsize(850, 500)
 root.resizable(True, True)
-root.configure(bg=LIGHT_GREY)
 
-heading = tk.Label(
-    root, text="Student Manager",
-    font=(FONT, 24, "bold"), bg=LIGHT_GREY, fg=NAVY
+
+# Set the application logo
+if os.path.exists("student_logo.png"):
+    logoImage = Image.open("student_logo.png")
+    logo = ImageTk.PhotoImage(logoImage)
+    root.iconphoto(True, logo)
+
+
+# Load the original background image
+backgroundOriginal = Image.open("student_background.png").convert("RGB")
+
+canvas = tk.Canvas(root, highlightthickness=0)
+canvas.pack(fill="both", expand=True)
+
+backgroundPhoto = None
+backgroundItem = canvas.create_image(0, 0, anchor="nw")
+
+
+# Main application heading
+headingItem = canvas.create_text(
+    550, 55,
+    text="STUDENT MANAGER",
+    font=(FONT, 25, "bold"),
+    fill=WHITE
 )
-heading.pack(pady=20)
 
-welcomeLabel = tk.Label(
-    root, text="Welcome! Manage and view student records.",
-    font=(FONT, 12), bg=LIGHT_GREY, fg=NAVY
+# Left-side menu heading
+menuHeadingItem = canvas.create_text(
+    145, 151,
+    text="STUDENT OPERATIONS",
+    font=(FONT, 12, "bold"),
+    fill=WHITE
 )
-welcomeLabel.pack(pady=5)
 
-viewButton = tk.Button(
-    root, text="View All Students",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=viewAllStudents
+
+# Create the right-side display panel
+content = tk.Frame(canvas, bg=LIGHT)
+
+contentWindow = canvas.create_window(
+    680, 350,
+    window=content,
+    width=780,
+    height=420
 )
-viewButton.pack(pady=8)
 
-searchLabel = tk.Label(
-    root, text="Enter Student Code:",
-    font=(FONT, 11), bg=LIGHT_GREY, fg=NAVY
-)
-searchLabel.pack(pady=5)
 
-searchEntry = tk.Entry(root, font=(FONT, 12), width=25)
-searchEntry.pack(pady=5)
+# Remove previous widgets from the display panel
+def clearPanel():
+    for widget in content.winfo_children():
+        widget.destroy()
 
-searchButton = tk.Button(
-    root, text="Search Student",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=searchStudent
-)
-searchButton.pack(pady=8)
 
-highestButton = tk.Button(
-    root, text="Find Highest Marks",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=highestMarks
-)
-highestButton.pack(pady=8)
+# Display a heading on each operation page
+def panelTitle(title):
+    tk.Label(
+        content,
+        text=title,
+        font=(FONT, 19, "bold"),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=(12, 15))
 
-lowestButton = tk.Button(
-    root, text="Find Lowest Marks",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=lowestMarks
-)
-lowestButton.pack(pady=8)
 
-sortButton = tk.Button(
-    root, text="Sort Students by Name (A-Z)",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=sortStudents
-)
-sortButton.pack(pady=8)
+# Create reusable buttons for different operations
+def actionButton(parent, text, command, colour=NAVY):
+    return tk.Button(
+        parent,
+        text=text,
+        command=command,
+        font=(FONT, 10, "bold"),
+        bg=colour,
+        fg=WHITE,
+        activebackground=GOLD,
+        activeforeground=NAVY,
+        relief="flat",
+        cursor="hand2",
+        padx=12,
+        pady=7
+    )
 
-addButton = tk.Button(
-    root, text="Add New Student",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=addStudent
-)
-addButton.pack(pady=8)
 
-deleteButton = tk.Button(
-    root, text="Delete Student",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=deleteStudent
-)
-deleteButton.pack(pady=8)
+# Display student records using a Treeview table
+def showTable(records):
+    columns = (
+        "code", "name", "c1", "c2", "c3",
+        "exam", "total", "percentage", "grade"
+    )
 
-updateButton = tk.Button(
-    root, text="Update Student Details",
-    font=(FONT, 12, "bold"), bg=NAVY,
-    fg=WHITE, width=25, command=updateStudent
-)
-updateButton.pack(pady=8)
+    tableFrame = tk.Frame(content, bg=LIGHT)
+    tableFrame.pack(fill="both", expand=True, padx=12, pady=5)
 
+    table = ttk.Treeview(
+        tableFrame,
+        columns=columns,
+        show="headings",
+        height=12
+    )
+
+    headings = {
+        "code": "Code",
+        "name": "Student Name",
+        "c1": "C1",
+        "c2": "C2",
+        "c3": "C3",
+        "exam": "Exam",
+        "total": "Total",
+        "percentage": "%",
+        "grade": "Grade"
+    }
+
+    widths = {
+        "code": 65,
+        "name": 145,
+        "c1": 42,
+        "c2": 42,
+        "c3": 42,
+        "exam": 55,
+        "total": 55,
+        "percentage": 65,
+        "grade": 50
+    }
+
+    for col in columns:
+        table.heading(col, text=headings[col])
+        table.column(col, width=widths[col], anchor="center")
+
+    for s in records:
+        table.insert("", "end", values=(
+            s["code"],
+            s["name"],
+            s["c1"],
+            s["c2"],
+            s["c3"],
+            s["exam"],
+            getTotal(s),
+            f"{getPercentage(s):.1f}%",
+            getGrade(s)
+        ))
+
+    scrollbar = ttk.Scrollbar(
+        tableFrame,
+        orient="vertical",
+        command=table.yview
+    )
+
+    table.configure(yscrollcommand=scrollbar.set)
+
+    table.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+
+# View all saved students
+def viewAll():
+    clearPanel()
+    panelTitle("ALL STUDENTS")
+    showTable(students)
+
+
+# Search for one student using their code
+def checkStudent():
+    clearPanel()
+    panelTitle("CHECK STUDENT")
+
+    tk.Label(
+        content,
+        text="Enter Student Code",
+        font=(FONT, 11),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=5)
+
+    codeEntry = tk.Entry(content, font=(FONT, 12), width=25)
+    codeEntry.pack(pady=5)
+
+    result = tk.Frame(content, bg=LIGHT)
+    result.pack(pady=15)
+
+    def findStudent():
+        for s in students:
+            if s["code"] == codeEntry.get().strip():
+
+                for widget in result.winfo_children():
+                    widget.destroy()
+
+                details = [
+                    ("Student Name", s["name"]),
+                    ("Student Code", s["code"]),
+                    ("Coursework 1", s["c1"]),
+                    ("Coursework 2", s["c2"]),
+                    ("Coursework 3", s["c3"]),
+                    ("Exam Marks", s["exam"]),
+                    ("Total Marks", getTotal(s)),
+                    ("Percentage", f"{getPercentage(s):.1f}%"),
+                    ("Grade", getGrade(s))
+                ]
+
+                for label, value in details:
+                    tk.Label(
+                        result,
+                        text=f"{label}: {value}",
+                        font=(FONT, 11),
+                        bg=LIGHT,
+                        fg=NAVY
+                    ).pack(anchor="w", pady=2)
+
+                return
+
+        messagebox.showerror("Not Found", "Student code not found.")
+
+    actionButton(content, "CHECK STUDENT", findStudent).pack(pady=8)
+
+
+# Search students by name or student code
+def searchStudent():
+    clearPanel()
+    panelTitle("SEARCH STUDENT")
+
+    tk.Label(
+        content,
+        text="Enter student name or code",
+        font=(FONT, 11),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=5)
+
+    searchEntry = tk.Entry(content, font=(FONT, 12), width=30)
+    searchEntry.pack(pady=5)
+
+    resultFrame = tk.Frame(content, bg=LIGHT)
+    resultFrame.pack(fill="both", expand=True)
+
+    def search():
+        query = searchEntry.get().strip().lower()
+
+        matches = [
+            s for s in students
+            if query in s["name"].lower()
+            or query in s["code"].lower()
+        ]
+
+        for widget in resultFrame.winfo_children():
+            widget.destroy()
+
+        if matches:
+            showTableInFrame(resultFrame, matches)
+        else:
+            tk.Label(
+                resultFrame,
+                text="No matching student found.",
+                font=(FONT, 12),
+                bg=LIGHT,
+                fg=NAVY
+            ).pack(pady=20)
+
+    actionButton(content, "SEARCH", search).pack(pady=8)
+
+
+# Display matching search results in a smaller table
+def showTableInFrame(parent, records):
+    columns = ("code", "name", "total", "percentage", "grade")
+
+    table = ttk.Treeview(
+        parent,
+        columns=columns,
+        show="headings",
+        height=9
+    )
+
+    headings = ["Code", "Student Name", "Total", "Percentage", "Grade"]
+
+    for col, heading in zip(columns, headings):
+        table.heading(col, text=heading)
+        table.column(col, anchor="center", width=135)
+
+    for s in records:
+        table.insert("", "end", values=(
+            s["code"],
+            s["name"],
+            getTotal(s),
+            f"{getPercentage(s):.1f}%",
+            getGrade(s)
+        ))
+
+    table.pack(fill="both", expand=True, padx=15, pady=5)
+
+
+# Find the student with the highest or lowest marks
+def showTopStudent(highest=True):
+    clearPanel()
+
+    if not students:
+        panelTitle("NO STUDENT RECORDS")
+        return
+
+    s = (max if highest else min)(students, key=getTotal)
+
+    panelTitle("HIGHEST MARKS" if highest else "LOWEST MARKS")
+
+    details = [
+        ("Student Name", s["name"]),
+        ("Student Code", s["code"]),
+        ("Total Marks", f"{getTotal(s)} / 160"),
+        ("Percentage", f"{getPercentage(s):.1f}%"),
+        ("Grade", getGrade(s))
+    ]
+
+    for label, value in details:
+        tk.Label(
+            content,
+            text=f"{label}: {value}",
+            font=(FONT, 13, "bold"),
+            bg=LIGHT,
+            fg=NAVY
+        ).pack(pady=7)
+
+
+# Allow the user to choose how to sort student marks
+def sortStudents():
+    clearPanel()
+    panelTitle("SORT STUDENTS")
+
+    tk.Label(
+        content,
+        text="Choose how to arrange student marks",
+        font=(FONT, 11),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=10)
+
+    buttons = tk.Frame(content, bg=LIGHT)
+    buttons.pack(pady=10)
+
+    actionButton(
+        buttons,
+        "Ascending Order",
+        lambda: displaySorted(False),
+        GOLD
+    ).pack(side="left", padx=10)
+
+    actionButton(
+        buttons,
+        "Descending Order",
+        lambda: displaySorted(True)
+    ).pack(side="left", padx=10)
+
+
+# Display the sorted student records
+def displaySorted(descending):
+    clearPanel()
+    panelTitle("SORTED STUDENT RECORDS")
+
+    records = sorted(
+        students,
+        key=getTotal,
+        reverse=descending
+    )
+
+    showTable(records)
+
+
+# Create reusable input fields for adding and updating students
+def createFields(fieldNames):
+    entries = {}
+
+    form = tk.Frame(content, bg=LIGHT)
+    form.pack(pady=5)
+
+    for i, name in enumerate(fieldNames):
+        row = i // 2
+        col = (i % 2) * 2
+
+        tk.Label(
+            form,
+            text=name,
+            font=(FONT, 10, "bold"),
+            bg=LIGHT,
+            fg=NAVY
+        ).grid(row=row, column=col, padx=8, pady=8, sticky="w")
+
+        entry = tk.Entry(form, font=(FONT, 11), width=17)
+        entry.grid(row=row, column=col + 1, padx=8, pady=8)
+
+        entries[name] = entry
+
+    return entries
+
+
+# Validate the marks entered by the user
+def readMark(entry, maximum):
+    value = entry.get().strip()
+
+    if not value.isdigit() or not 0 <= int(value) <= maximum:
+        raise ValueError(f"Enter a mark between 0 and {maximum}.")
+
+    return int(value)
+
+
+# Add a new student record
+def addStudent():
+    clearPanel()
+    panelTitle("ADD NEW STUDENT")
+
+    fields = createFields([
+        "Student Code",
+        "Student Name",
+        "Course 1 ( /20)",
+        "Course 2 ( /20)",
+        "Course 3 ( /20)",
+        "Exam Marks ( /100)"
+    ])
+
+    def save():
+        code = fields["Student Code"].get().strip()
+        name = fields["Student Name"].get().strip()
+
+        if not code or not name:
+            messagebox.showerror("Error", "Enter the student code and name.")
+            return
+
+        if any(s["code"] == code for s in students):
+            messagebox.showerror("Error", "Student code already exists.")
+            return
+
+        try:
+            newStudent = {
+                "code": code,
+                "name": name,
+                "c1": readMark(fields["Course 1 ( /20)"], 20),
+                "c2": readMark(fields["Course 2 ( /20)"], 20),
+                "c3": readMark(fields["Course 3 ( /20)"], 20),
+                "exam": readMark(fields["Exam Marks ( /100)"], 100)
+            }
+
+        except ValueError as error:
+            messagebox.showerror("Invalid Marks", str(error))
+            return
+
+        students.append(newStudent)
+        saveStudents()
+
+        messagebox.showinfo("Success", "Student added successfully.")
+        viewAll()
+
+    actionButton(
+        content,
+        "SAVE STUDENT",
+        save,
+        "#16834A"
+    ).pack(pady=12)
+
+
+# Update the marks of an existing student
+def updateStudent():
+    clearPanel()
+    panelTitle("UPDATE STUDENT MARKS")
+
+    fields = createFields([
+        "Student Code",
+        "Course 1 ( /20)",
+        "Course 2 ( /20)",
+        "Course 3 ( /20)",
+        "Exam Marks ( /100)"
+    ])
+
+    def update():
+        code = fields["Student Code"].get().strip()
+
+        s = next(
+            (x for x in students if x["code"] == code),
+            None
+        )
+
+        if s is None:
+            messagebox.showerror("Not Found", "Student code not found.")
+            return
+
+        try:
+            s["c1"] = readMark(fields["Course 1 ( /20)"], 20)
+            s["c2"] = readMark(fields["Course 2 ( /20)"], 20)
+            s["c3"] = readMark(fields["Course 3 ( /20)"], 20)
+            s["exam"] = readMark(fields["Exam Marks ( /100)"], 100)
+
+        except ValueError as error:
+            messagebox.showerror("Invalid Marks", str(error))
+            return
+
+        saveStudents()
+
+        messagebox.showinfo("Success", "Marks updated successfully.")
+        viewAll()
+
+    actionButton(
+        content,
+        "UPDATE MARKS",
+        update,
+        "#16834A"
+    ).pack(pady=12)
+
+
+# Delete a student record using the student code
+def deleteStudent():
+    clearPanel()
+    panelTitle("DELETE STUDENT")
+
+    tk.Label(
+        content,
+        text="Enter Student Code",
+        font=(FONT, 11),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=8)
+
+    codeEntry = tk.Entry(content, font=(FONT, 12), width=25)
+    codeEntry.pack(pady=5)
+
+    def delete():
+        code = codeEntry.get().strip()
+
+        for s in students:
+            if s["code"] == code:
+
+                if messagebox.askyesno(
+                    "Confirm Delete",
+                    f"Delete {s['name']} from the records?"
+                ):
+                    students.remove(s)
+                    saveStudents()
+
+                    messagebox.showinfo("Success", "Student deleted.")
+                    viewAll()
+
+                return
+
+        messagebox.showerror("Not Found", "Student code not found.")
+
+    actionButton(
+        content,
+        "DELETE STUDENT",
+        delete,
+        "#A52A2A"
+    ).pack(pady=12)
+
+
+# Display the welcome page
+def showHome():
+    clearPanel()
+
+    tk.Label(
+        content,
+        text="WELCOME TO STUDENT MANAGER",
+        font=(FONT, 21, "bold"),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=(95, 15))
+
+    tk.Label(
+        content,
+        text="Select an operation from the menu to manage student records.",
+        font=(FONT, 12),
+        bg=LIGHT,
+        fg=NAVY
+    ).pack(pady=5)
+
+    tk.Label(
+        content,
+        text=f"Total Students: {len(students)}",
+        font=(FONT, 15, "bold"),
+        bg=LIGHT,
+        fg=GOLD
+    ).pack(pady=20)
+
+
+# Store menu options and their related functions
+menuItems = [
+    ("View All Students", viewAll),
+    ("Check Student", checkStudent),
+    ("Search Student", searchStudent),
+    ("Highest Marks", lambda: showTopStudent(True)),
+    ("Lowest Marks", lambda: showTopStudent(False)),
+    ("Sort Students", sortStudents),
+    ("Add Student", addStudent),
+    ("Update Marks", updateStudent),
+    ("Delete Student", deleteStudent)
+]
+
+menuY = [211, 257, 301, 346, 390, 433, 477, 519, 558]
+menuTextItems = []
+
+
+# Create clickable text for each background oval
+for (buttonText, command), y in zip(menuItems, menuY):
+
+    textItem = canvas.create_text(
+        145,
+        y,
+        text=buttonText,
+        font=(FONT, 9, "bold"),
+        fill=NAVY
+    )
+
+    canvas.tag_bind(
+        textItem,
+        "<Button-1>",
+        lambda event, cmd=command: cmd()
+    )
+
+    canvas.tag_bind(
+        textItem,
+        "<Enter>",
+        lambda event: canvas.config(cursor="hand2")
+    )
+
+    canvas.tag_bind(
+        textItem,
+        "<Leave>",
+        lambda event: canvas.config(cursor="")
+    )
+
+    menuTextItems.append(textItem)
+
+
+# Resize the background and all elements to fill the window
+def resizeLayout(event):
+    global backgroundPhoto
+
+    width = event.width
+    height = event.height
+
+    if width < 1 or height < 1:
+        return
+
+    # Stretch the background image to the complete window size
+    scaleX = width / 1100
+    scaleY = height / 620
+
+    resizedBackground = backgroundOriginal.resize(
+        (width, height),
+        Image.Resampling.LANCZOS
+    )
+
+    backgroundPhoto = ImageTk.PhotoImage(resizedBackground)
+    canvas.itemconfig(backgroundItem, image=backgroundPhoto)
+    canvas.coords(backgroundItem, 0, 0)
+
+    # Resize and reposition the main heading
+    canvas.coords(
+        headingItem,
+        550 * scaleX,
+        55 * scaleY
+    )
+
+    canvas.itemconfig(
+        headingItem,
+        font=(FONT, max(16, int(25 * min(scaleX, scaleY))), "bold")
+    )
+
+    # Resize and reposition the menu heading
+    canvas.coords(
+        menuHeadingItem,
+        145 * scaleX,
+        151 * scaleY
+    )
+
+    canvas.itemconfig(
+        menuHeadingItem,
+        font=(FONT, max(9, int(12 * min(scaleX, scaleY))), "bold")
+    )
+
+    # Resize the right-side display panel
+    canvas.coords(
+        contentWindow,
+        680 * scaleX,
+        350 * scaleY
+    )
+
+    canvas.itemconfig(
+        contentWindow,
+        width=int(780 * scaleX),
+        height=int(420 * scaleY)
+    )
+
+    # Keep each menu label centred on its background oval
+    for textItem, y in zip(menuTextItems, menuY):
+        canvas.coords(
+            textItem,
+            145 * scaleX,
+            y * scaleY
+        )
+
+        canvas.itemconfig(
+            textItem,
+            font=(FONT, max(8, int(9 * min(scaleX, scaleY))), "bold")
+        )
+
+
+# Run the resize function whenever the window changes size
+canvas.bind("<Configure>", resizeLayout)
+
+# Display the welcome page
+showHome()
+
+# Start the Tkinter event loop
 root.mainloop()
+
+
+
+
